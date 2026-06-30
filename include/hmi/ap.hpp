@@ -1,27 +1,27 @@
-// Access point
-
+// Access point (Captive Portal)
+#pragma once
 #include <Arduino.h>
 #include "utils.hpp"
 #include "ir/emitter.hpp"
+#include <DNSServer.h>
 #include "hmi/ui.hpp"
 
 #include <WiFi.h>
 #include <WebServer.h>
 
-const char* ssid = "Control_ESP32";
-const char* password = "password123"; // At least 8 chars
-
 WebServer server(80);
+const byte DNS_PORT = 53;
+DNSServer dnsServer;
 
-
-CycleComp<int> receiver(
+CycleComp<const char*, const char*> access_point(
     // Begin
-    [](int PIN) { 
+    [](const char *ssid, const char* pass) { 
         Serial.println("Init Access Point...");
-        WiFi.softAP(ssid, password);
+        WiFi.softAP(ssid, pass);
         IPAddress IP = WiFi.softAPIP();
         Serial.print("Remote ip addr: ");
         Serial.println(IP); // Usually 192.168.4.1
+        dnsServer.start(DNS_PORT, "*", IP);
 
         // 1. Root page Path
         server.on("/", HTTP_GET, []() {
@@ -48,12 +48,18 @@ CycleComp<int> receiver(
             }
         });
 
+        server.onNotFound([]() {
+            server.sendHeader("Location", "/", true);
+            server.send(302, "text/plain", "");
+        });
+
         server.begin();
         Serial.println("Web server initialized.");
     },
 
     // Loop
     []() {
+        dnsServer.processNextRequest();
         server.handleClient();
     }
 );

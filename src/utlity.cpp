@@ -19,7 +19,7 @@ public:
     }
 
     // Non-blocking periodic execution
-    void run(unsigned long period_ms = 100) {
+    void run(unsigned long period_ms = 0) {
         // If period is 0, run continuously (useful for polling listeners)
         if (period_ms == 0) {
             if (runCallback) runCallback();

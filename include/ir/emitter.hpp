@@ -1,3 +1,5 @@
+// Emitter
+#pragma once
 #include <Arduino.h>
 #include <IRremote.hpp>
 #include "utils.hpp"
