@@ -1,22 +1,89 @@
 body {
    background-color: #121212;
    color: white;
-   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+   font-family: "Segoe UI", Tahoma, sans-serif;
    display: flex;
-   justify-content: center;
+   flex-direction: column;
    align-items: center;
    min-height: 100vh;
    margin: 0;
    padding: 20px 0;
 }
-/* El "cuerpo" del control remoto */
+
+.top-bar {
+   background-color: #2a2a2a;
+   padding: 15px 20px;
+   border-radius: 20px;
+   margin-bottom: 20px;
+   width: 240px;
+   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+}
+select {
+   background-color: #404040;
+   color: white;
+   border: none;
+   padding: 10px;
+   border-radius: 10px;
+   font-size: 16px;
+   font-weight: bold;
+   width: 100%;
+}
+.toggle-container {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   font-weight: bold;
+   font-size: 14px;
+}
+/* Estilo del interruptor de Aprendizaje */
+.switch {
+   position: relative;
+   display: inline-block;
+   width: 50px;
+   height: 24px;
+}
+.switch input {
+   opacity: 0;
+   width: 0;
+   height: 0;
+}
+.slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #555;
+   transition: 0.4s;
+   border-radius: 24px;
+}
+.slider:before {
+   position: absolute;
+   content: "";
+   height: 16px;
+   width: 16px;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   transition: 0.4s;
+   border-radius: 50%;
+}
+input:checked + .slider {
+   background-color: #d32f2f;
+}
+input:checked + .slider:before {
+   transform: translateX(26px);
+}
+
 .remote-body {
    background-color: #2a2a2a;
    padding: 30px 20px;
    border-radius: 40px;
-   box-shadow:
-      0 15px 25px rgba(0, 0, 0, 0.8),
-      inset 0 2px 5px rgba(255, 255, 255, 0.1);
+   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.8);
    display: grid;
    grid-template-columns: 1fr 1fr;
    gap: 15px;
@@ -31,14 +98,12 @@ button {
    font-weight: bold;
    border-radius: 15px;
    cursor: pointer;
-   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
    transition: all 0.1s ease;
    touch-action: manipulation;
 }
 button:active {
-   transform: translateY(4px);
-   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
    background-color: #555;
+   transform: translateY(4px);
 }
 .btn-power {
    background-color: #d32f2f;
@@ -49,10 +114,7 @@ button:active {
 .d-pad {
    grid-column: span 2;
    display: grid;
-   grid-template-areas:
-      ". up ."
-      "left center right"
-      ". down .";
+   grid-template-areas: ". up ." "left center right" ". down .";
    gap: 4px;
    width: 170px;
    height: 170px;
@@ -60,24 +122,13 @@ button:active {
    background-color: #1e1e1e;
    border-radius: 50%;
    padding: 12px;
-   box-shadow:
-      inset 0 4px 10px rgba(0, 0, 0, 0.7),
-      0 2px 5px rgba(255, 255, 255, 0.05);
 }
 .d-pad button {
    padding: 0;
    border-radius: 8px;
    background-color: #383838;
-   display: flex;
-   justify-content: center;
-   align-items: center;
    font-size: 18px;
-   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
 }
-.d-pad button:active {
-   background-color: #666;
-}
-
 .d-pad .d-up {
    grid-area: up;
    border-radius: 30px 30px 8px 8px;
@@ -100,9 +151,19 @@ button:active {
    background-color: #505050;
    font-size: 14px;
 }
-
-/* Macro */
 .macro-row {
    background-color: #222;
    border-radius: 12px;
+}
+
+/* Banner de estado flotante */
+#status {
+   position: fixed;
+   bottom: 20px;
+   background-color: #4caf50;
+   color: white;
+   padding: 10px 20px;
+   border-radius: 20px;
+   font-weight: bold;
+   display: none;
 }

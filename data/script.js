@@ -39,10 +39,42 @@ function closeLearnModal() {
    fetch("/api/learn/cancel") // Notify the ESP32 to abort
 }
 
-function sendCmd(command) {
-   fetch("/ir?btn=" + command)
-      .then((response) => {
-         if ("vibrate" in navigator) navigator.vibrate(50)
+function updateMode() {
+   const isLearning = document.getElementById("learnToggle").checked
+   document.getElementById("modeText").innerText = isLearning ? "Mode: Learn (Red)" : "Mode: Use Control"
+   document.getElementById("modeText").style.color = isLearning ? "#d32f2f" : "white"
+}
+
+function showStatus(text, color) {
+   const statusEl = document.getElementById("status")
+   statusEl.innerText = text
+   statusEl.style.backgroundColor = color
+   statusEl.style.display = "block"
+   setTimeout(() => (statusEl.style.display = "none"), 3000)
+}
+
+function sendCmd(btn_id) {
+   if ("vibrate" in navigator) navigator.vibrate(50)
+
+   const isLearning = document.getElementById("learnToggle").checked
+   const remote_id = document.getElementById("remoteSelect").value
+   const endpoint = isLearning ? "/learn" : "/ir"
+
+   if (isLearning) {
+      showStatus("Point Controller to record...", "#ff9800")
+   }
+
+   fetch(`${endpoint}?remote=${remote_id}&btn=${btn_id}`)
+      .then((response) => response.text())
+      .then((text) => {
+         if (isLearning) {
+            showStatus("Saved.", "#4caf50")
+            document.getElementById("learnToggle").checked = false // auto-off
+            updateMode()
+         }
       })
-      .catch((error) => console.error("Error:", error))
+      .catch((error) => {
+         showStatus("Connection error.", "#d32f2f")
+         console.error(error)
+      })
 }

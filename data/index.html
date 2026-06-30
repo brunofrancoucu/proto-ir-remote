@@ -2,15 +2,29 @@
    <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-      <title>ESP32 Remote</title>
-
+      <title>Control Universal ESP32</title>
       <!-- Import CSS -->
       <link rel="stylesheet" href="style.css" />
    </head>
    <body>
+      <div class="top-bar">
+         <select id="remoteSelect">
+            <option value="tv_sala">TV</option>
+            <option value="audio">Remote 2</option>
+            <option value="leds">Remote 3</option>
+         </select>
+
+         <div class="toggle-container">
+            <span id="modeText">Modo: Usar Control</span>
+            <label class="switch">
+               <input type="checkbox" id="learnToggle" onchange="updateMode()" />
+               <span class="slider"></span>
+            </label>
+         </div>
+      </div>
+
       <div class="remote-body">
          <button class="btn-power" onclick="sendCmd('power')">POWER</button>
-
          <div class="d-pad">
             <button class="d-up" onclick="sendCmd('up')">▲</button>
             <button class="d-left" onclick="sendCmd('left')">◀</button>
@@ -18,16 +32,15 @@
             <button class="d-right" onclick="sendCmd('right')">▶</button>
             <button class="d-down" onclick="sendCmd('down')">▼</button>
          </div>
-
          <button onclick="sendCmd('vol_up')">Vol +</button>
          <button onclick="sendCmd('ch_up')">Ch +</button>
-
          <button onclick="sendCmd('vol_down')">Vol -</button>
          <button onclick="sendCmd('ch_down')">Ch -</button>
-
          <button class="macro-row" onclick="sendCmd('m1')">M1</button>
          <button class="macro-row" onclick="sendCmd('m2')">M2</button>
       </div>
+
+      <div id="status">Mensaje...</div>
 
       <!-- Import Javascript -->
       <script src="script.js"></script>
