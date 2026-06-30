@@ -56,7 +56,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       border-radius: 30px;
     }
     
-    /* D-PAD CIRCULAR */
+    
     .d-pad {
       grid-column: span 2;
       display: grid;
@@ -68,8 +68,8 @@ const char index_html[] PROGMEM = R"rawliteral(
       width: 170px;
       height: 170px;
       margin: 10px auto;
-      background-color: #1e1e1e; /* Fondo oscuro del círculo */
-      border-radius: 50%; /* Lo hace redondo */
+      background-color: #1e1e1e; 
+      border-radius: 50%; 
       padding: 12px;
       box-shadow: inset 0 4px 10px rgba(0,0,0,0.7), 0 2px 5px rgba(255,255,255,0.05);
     }
@@ -86,7 +86,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     .d-pad button:active {
       background-color: #666;
     }
-    /* Asignación de áreas y bordes redondeados para seguir la forma circular */
+    
     .d-pad .d-up { grid-area: up; border-radius: 30px 30px 8px 8px; }
     .d-pad .d-down { grid-area: down; border-radius: 8px 8px 30px 30px; }
     .d-pad .d-left { grid-area: left; border-radius: 30px 8px 8px 30px; }
@@ -98,7 +98,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       font-size: 14px;
     }
     
-    /* Botones Macro */
+    /* Macro */
     .macro-row {
       background-color: #222;
       border-radius: 12px;
@@ -129,13 +129,6 @@ const char index_html[] PROGMEM = R"rawliteral(
   </div>
 
   <script>
-    function sendCmd(command) {
-      fetch('/ir?btn=' + command)
-        .then(response => {
-            if('vibrate' in navigator) navigator.vibrate(50);
-        })
-        .catch(error => console.error('Error:', error));
-    }
   </script>
 
 </body>

@@ -73,13 +73,7 @@ CycleComp<int> emitter(
     },
     // Loop
     []() {
-        Serial.println("<- Transmitting raw array...");
-        IrSender.sendRaw(tvDownRaw, sizeof(tvDownRaw) / sizeof(tvDownRaw[0]), 38);
-        // Ráfaga de 3 envíos para asegurar el 'hit' en el receptor del TV
-        // for(int i = 0; i < 3; i++) {
-        //     IrSender.sendRaw(tvDownRaw, sizeof(tvDownRaw) / sizeof(tvDownRaw[0]), 38);
-        //     delay(40); // Gap de separación estándar
-        // }
-
+        // Serial.println("<- Transmitting raw array...");
+        // IrSender.sendRaw(tvDownRaw, sizeof(tvDownRaw) / sizeof(tvDownRaw[0]), 38);
     }
 );

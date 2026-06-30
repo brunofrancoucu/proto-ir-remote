@@ -7,8 +7,18 @@ pio init --ide vscode
 ```
 
 ### 2. Upload
+
 ```bash
 prio run -t upload
+pio run -t uploadfs
+```
+
+### Reset
+
+```bash
+# Format & local dev libs
+pio run -t reset
+pio run -t clean
 ```
 
 ## Log
@@ -36,4 +46,10 @@ pio device list
 # Upload & compile
 pio run -t upload
 pio device monitor
+```
+
+### 4. Compile LittleFS
+
+```bash
+pio run -t uploadfs
 ```
