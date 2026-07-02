@@ -9,7 +9,7 @@ pio init --ide vscode
 ### 2. Upload
 
 ```bash
-prio run -t upload
+pio run -t upload
 pio run -t uploadfs
 ```
 

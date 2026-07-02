@@ -4,10 +4,9 @@
 #include "utils.hpp"
 #include "ir/emitter.hpp"
 #include <DNSServer.h>
-// #include "hmi/ui.hpp"
 #include <map>
 #include "ir/receiver.hpp"
-
+#include "storage.hpp"
 #include <WiFi.h>
 #include <WebServer.h>
 #include <LittleFS.h>
@@ -16,25 +15,17 @@ WebServer server(80);
 const byte DNS_PORT = 53;
 DNSServer dnsServer;
 
-
+// Api Learn
 extern bool g_is_learning;
-struct SignalData { std::vector<uint16_t> timings; };
-// Dict: control name -> (btn name -> IR signal)
-std::map<String, std::map<String, SignalData>> databaseIR;
-String pendingRemote = "";
-String pendingButton = "";
-unsigned long learnStartTime = 0;
-const unsigned long LEARN_TIMEOUT_MS = 10000; // 10 secs for copying
+std::map<String, std::map<String, SignalData>> databaseIR; // Signal data defined at storage.hpp
+std::vector<uint16_t> lastCapturedSignal;
+std::vector<uint16_t> lastSyncedSignal;
 
 CycleComp<const char*, const char*> access_point(
     // Begin
-    [](const char *ssid, const char* pass) { 
-        LittleFS.begin(true); // unhandled exceptions
-        Serial.println("Init Access Point...");
+    [](const char *ssid, const char* pass) {
         WiFi.softAP(ssid, pass);
         IPAddress IP = WiFi.softAPIP();
-        Serial.print("Remote ip addr: ");
-        Serial.println(IP); // Usually 192.168.4.1
         dnsServer.start(DNS_PORT, "*", IP);
 
         // 1. Root page Path
@@ -42,29 +33,57 @@ CycleComp<const char*, const char*> access_point(
         server.serveStatic("/script.js", LittleFS, "/script.js");
         server.serveStatic("/", LittleFS, "/index.html");
 
-        server.on("/learn", HTTP_GET, []() {
-            if (server.hasArg("remote") && server.hasArg("btn")) {
-                pendingRemote = server.arg("remote");
-                pendingButton = server.arg("btn");
-                g_is_learning = true;
-                learnStartTime = millis();
-                
-                IrReceiver.resume(); // Limpiar el buffer de lecturas viejas
-                Serial.printf("Esperando señal IR para: %s -> %s\n", pendingRemote.c_str(), pendingButton.c_str());
-                
-                // Le respondemos rápido al navegador para no bloquear la web
-                server.send(200, "text/plain", "Listening");
+        server.on("/api/learn/stop", HTTP_GET, []() {
+            g_is_learning = false;    
+            Serial.printf("Learn mode stop: %d\n", g_is_learning);
+            server.send(200, "text/plain", "Stopped Listening");
+        });
+        
+        server.on("/api/learn/start", HTTP_GET, []() {
+            g_is_learning = true;
+            lastCapturedSignal.clear(); // Empty the temporary buffer
+            Serial.printf("Learn mode start: %d\n", g_is_learning);
+            server.send(200, "text/plain", "Listening");
+        });
+        
+        // Return new signal if the buffer has changed since last sync, otherwise return idle
+        server.on("/api/learn/buffer", HTTP_GET, []() {
+            if (lastCapturedSignal.size() > 2 && lastCapturedSignal != lastSyncedSignal) {
+                lastSyncedSignal = lastCapturedSignal;
+                String json = "{\"status\":\"success\", \"pulses\":" + String(lastCapturedSignal.size()) + "}";
+                server.send(200, "application/json", json);
             } else {
-                server.send(400, "text/plain", "Faltan parametros");
+                server.send(200, "application/json", "{\"status\":\"idle\"}");
+            }
+        });
+
+        server.on("/api/learn/send", HTTP_GET, []() {
+            if (server.hasArg("remote") && server.hasArg("btn")) {
+                String remote = server.arg("remote");
+                String btn = server.arg("btn");
+
+                if (lastCapturedSignal.size() > 0) {
+                    // Move the buffer into the permanent database
+                    databaseIR[remote][btn].timings = lastCapturedSignal;
+                    lastCapturedSignal.clear(); // Clear it for the next learning session
+                    saveDatabase();
+                    
+                    Serial.printf("Assigned to %s -> %s\n", remote.c_str(), btn.c_str());
+                    server.send(200, "text/plain", "Saved");
+                } else {
+                    server.send(400, "text/plain", "No signal in buffer to save!");
+                }
+            } else {
+                server.send(400, "text/plain", "Missing params");
             }
         });
 
         // 2. Control route
-        server.on("/ir", HTTP_GET, []() {
+        server.on("/api/transmit", HTTP_GET, []() {
             String remote = server.arg("remote");
             String btn = server.arg("btn");
-            
-            Serial.printf("Asked to send: %s -> %s\n", remote.c_str(), btn.c_str());
+
+            Serial.printf("Transmitting: %s -> %s\n", remote.c_str(), btn.c_str());
 
             // If btn exists
             if (databaseIR.count(remote) > 0 && databaseIR[remote].count(btn) > 0) {
@@ -82,19 +101,15 @@ CycleComp<const char*, const char*> access_point(
 
         server.onNotFound([]() {
             File file = LittleFS.open("/index.html", "r");
-
             if (!file) {
                 server.send(404, "text/plain", "index.html not found");
                 return;
             }
-
             server.streamFile(file, "text/html");
             file.close();
-            server.send(302, "text/plain", "");
         });
-        
         server.begin();
-        Serial.println("Web server initialized.");
+        Serial.println("Initialized web server at: http://" + IP.toString());
     },
 
     // Loop
