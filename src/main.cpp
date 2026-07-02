@@ -3,7 +3,7 @@
 #include "utils.hpp"
 #include "ir/emitter.hpp"
 #include "ir/receiver.hpp"
-#include "hmi/ap.hpp"
+#include "ap.hpp"
 
 // Temp
 #include "storage.hpp"

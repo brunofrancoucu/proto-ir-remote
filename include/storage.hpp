@@ -1,7 +1,7 @@
 #pragma once
 #include <ArduinoJson.h>
 #include <LittleFS.h>
-#include "hmi/ap.hpp"
+#include "ap.hpp"
 
 
 // struct SignalData { std::vector<uint16_t> timings; };

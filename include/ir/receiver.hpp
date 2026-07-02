@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <IRremote.hpp>
 #include "utils.hpp"
-#include "hmi/ap.hpp"
+#include "ap.hpp"
 
 // Temp
 #include "storage.hpp"
